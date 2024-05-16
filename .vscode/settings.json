@@ -1,0 +1,15 @@
+{
+  "azureLogicAppsStandard.deploySubpath": "bin/Release/net6.0/publish",
+  "azureLogicAppsStandard.projectLanguage": "C#",
+  "azureLogicAppsStandard.projectRuntime": "~4",
+  "debug.internalConsoleOptions": "neverOpen",
+  "azureFunctions.suppressProject": true,
+  "terminal.integrated.env.windows": {
+    "PATH": "C:\\Users\\quinnmeagher\\.azurelogicapps\\dependencies\\DotNetSDK;${env:PATH}"
+  },
+  "omnisharp.dotNetCliPaths": [
+    "C:\\Users\\quinnmeagher\\.azurelogicapps\\dependencies\\DotNetSDK"
+  ],
+  "azurite.location": "C:\\Users\\quinnmeagher\\.azurelogicapps\\.azurite",
+  "azureLogicAppsStandard.preDeployTask": "publish"
+}

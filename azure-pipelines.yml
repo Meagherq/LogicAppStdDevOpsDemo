@@ -1,0 +1,73 @@
+trigger:
+  - 'main'
+  
+variables:
+  buildConfiguration: 'Release'
+  releaseBranchName: 'release'
+
+stages:
+- stage: 'Build'
+  displayName: 'Build the Logic App'
+  jobs: 
+  - job: 'Build'
+    displayName: 'Build job'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+      - task: ArchiveFiles@2
+        displayName: "Archive files"
+        inputs:
+          rootFolderOrFile: "$(System.DefaultWorkingDirectory)"
+          includeRootFolder: false
+          archiveType: 'zip'
+          archiveFile: "$(System.DefaultWorkingDirectory)/output.zip"
+      - task: PublishPipelineArtifact@1
+        displayName: 'Publish Artifact'
+        inputs:
+          targetPath: '$(System.DefaultWorkingDirectory)/output.zip'
+          artifactName: drop
+    
+- stage: 'DeployDev'
+  displayName: 'Deploy Dev Environment'
+  jobs:
+  - deployment: 'DevDeploy'
+    displayName: 'Dev Deploy'
+    pool:
+      vmImage: 'ubuntu-latest'
+    environment: 'Dev'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+          - task: AzureFunctionApp@1
+            displayName: 'Deploy logic app workflows'
+            inputs:
+              azureSubscription: 'LogicAppDemoServiceConn'
+              appType: 'functionAppLinux' ## Default: functionApp 
+              appName: 'LogicAppsStdDevOpsDemo'
+              package: '$(Pipeline.Workspace)/drop/output.zip'
+              deploymentMethod: 'zipDeploy'
+- stage: 'DeployProd'
+  displayName: 'Deploy Prod Environment'
+  jobs:
+  - deployment: 'ProdDeploy'
+    displayName: 'Prod Deploy'
+    pool:
+      vmImage: 'ubuntu-latest'
+    environment: 'Prod'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: drop
+          - task: AzureFunctionApp@1
+            displayName: 'Deploy logic app workflows'
+            inputs:
+              azureSubscription: 'LogicAppDemoServiceConn'
+              appType: 'functionAppLinux' ## Default: functionApp 
+              appName: 'LogicAppsStdDevOpsDemo'
+              package: '$(Pipeline.Workspace)/drop/output.zip'
+              deploymentMethod: 'zipDeploy'
